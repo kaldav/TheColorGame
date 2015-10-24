@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>The Color Game</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="style/buttons.css" rel="stylesheet" type="text/css"/>
+        <link href="style/confirm.css" rel="stylesheet" type="text/css">
+        <link href="style/headers.css" rel="stylesheet" type="text/css">
+        <link href="style/app.css" rel="stylesheet" type="text/css"/>
+		
+        <script src="js/jquery-2.1.4.min.js" type="text/javascript"></script>
+        <script src="js/app.js" type="text/javascript"></script>
+    </head>
+    <body id="main_body">
+		<form class="end_game" role="dialog" data-type="confirm">
+		  <section>
+			<h1>Wrong answer</h1>
+			<h1 id="highscore_msg">New Highscore!</h3>
+			<p>Do you want to start new game?</p>
+		  </section>
+		  <menu>
+			<button type="button" class="no_new_game">No</button>
+			<button type="button" class="yes_new_game">Yes</button>
+		  </menu>
+		</form>
+		<section class="skin-comms" role="region">
+		  <header>
+			<a href="index.html"><span class="icon icon-back">back</span></a>
+			<h1>Level <span id="level"></span></h1>
+		  </header>
+		</section>
+		<div id="main_div">
+			<div id="game_content">
+				<div id="color"><span>Find this color!</span></div>
+				<div id="generated_color_1" class="generated_color"><span>1</span></div>
+				<div id="generated_color_2" class="generated_color"><span>2</span></div>
+				<div id="generated_color_3" class="generated_color"><span>3</span></div>
+				<div id="generated_color_4" class="generated_color"><span>4</span></div>
+				<div id="generated_color_5" class="generated_color"><span>5</span></div>
+				<div id="generated_color_6" class="generated_color"><span>6</span></div>
+				<div id="generated_color_7" class="generated_color"><span>7</span></div>
+				<div id="generated_color_8" class="generated_color"><span>8</span></div>
+				<div id="generated_color_9" class="generated_color"><span>9</span></div>
+				<div id="generated_color_10" class="generated_color"><span>10</span></div>
+				<div id="generated_color_11" class="generated_color"><span>11</span></div>
+				<div id="generated_color_12" class="generated_color"><span>12</span></div>
+				<div id="generated_color_13" class="generated_color"><span>13</span></div>
+				<div id="generated_color_14" class="generated_color"><span>14</span></div>
+				<div id="generated_color_15" class="generated_color"><span>15</span></div>
+				<div id="generated_color_16" class="generated_color"><span>16</span></div>
+			</div>
+		</div>
+		
+	<script>	
+	$(document).ready(function() {
+		var click = new Audio('audio/click.mp3');
+		var win = new Audio('audio/win.mp3');
+		var level=localStorage.getItem("level");
+		var highscore=localStorage.getItem("highscore");
+		var game_mode=localStorage.getItem("game_mode");
+		localStorage.setItem("game_mode","continue");
+		
+		var level_colors = [];
+		var good_color;
+		
+		var range_min = 30-level > 10 ? 30-level : 10;
+		var range_max = 60-level > 40 ? 60-level : 40;
+		
+		if (game_mode=="continue"){
+			//get colors
+			level_colors = JSON.parse(localStorage.getItem("level_colors"));
+			var good_color = localStorage.getItem("good_color");
+			console.log(level_colors);
+			$("#color").css("background-color","rgb("+level_colors[good_color].r+","+level_colors[good_color].g+","+level_colors[good_color].b+")");
+			
+			for (var i=1; i<=16; i++){
+				if (i==good_color){
+					$("#generated_color_"+i).addClass("solution");
+				}
+				$("#generated_color_"+i).css("background-color","rgb("+level_colors[i].r+","+level_colors[i].g+","+level_colors[i].b+")");
+			}
+		}
+		else if (game_mode=="next_level"){
+			level++;
+			//generálás
+			var red = Math.floor(Math.random() * 200)+27;
+			var green = Math.floor(Math.random() * 200)+27;
+			var blue = Math.floor(Math.random() * 200)+27;
+			var good = Math.floor(Math.random() * 16) + 1;
+			good_color=good;
+			console.log(good);
+			
+			$("#color").css("background-color","rgb("+red+","+green+","+blue+")");
+			for (var i=1; i<=16; i++){
+				if (i==good){
+					$("#generated_color_"+i).css("background-color","rgb("+red+","+green+","+blue+")");
+					$("#generated_color_"+i).addClass("solution");
+					level_colors[i]={"r":red,"g":green,"b":blue};
+				}
+				else{
+					var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+					var red_mod = (Math.floor(Math.random() * (range_max - range_min + 1)) + range_min) * plusOrMinus;
+					var r = red + red_mod;
+					if (r<0) {r=0;}
+					if (r>255) {r=255;}
+					
+					var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+					var green_mod = (Math.floor(Math.random() * (range_max - range_min + 1)) + range_min) * plusOrMinus;
+					var g = green + green_mod;
+					if (g<0) {g=0;}
+					if (g>255) {g=255;}
+					
+					var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+					var blue_mod = (Math.floor(Math.random() * (range_max - range_min + 1)) + range_min) * plusOrMinus;
+					var b = blue + blue_mod;
+					if (b<0) {b=0;}
+					if (b>255) {b=255;}
+					$("#generated_color_"+i).css("background-color","rgb("+r+","+g+","+b+")");
+					level_colors[i]={"r":r,"g":g,"b":b};
+				}
+			}
+			localStorage.setItem("good_color",good_color);
+			localStorage.setItem("level_colors",JSON.stringify(level_colors));
+			localStorage.setItem("level",level);
+		}
+		$("#level").html(level); //level loading
+		
+		$(".generated_color").click(function(e){
+			//ha helyes
+			if ($(this).hasClass("solution")){
+				click.play();
+				localStorage.setItem("level",level);
+				localStorage.setItem("game_mode","next_level");
+				setTimeout(function(){
+					window.location.href="game.html";
+				}, 100);
+			}
+			else{
+				localStorage.setItem("level",0);
+				localStorage.setItem("game_mode","next_level");
+				if (highscore<level-1){
+					localStorage.setItem("highscore",level-1);
+					$("#highscore_msg").show();
+					click.play();
+				}
+				else{
+					click.play();
+				}
+				var timer = 500;
+				$(this).addClass("wrong_border").fadeIn(timer).fadeOut(timer).fadeIn(timer).fadeOut(timer).fadeIn(timer);
+				$(".solution").addClass("good_border").fadeIn(timer).fadeOut(timer).fadeIn(timer).fadeOut(timer).fadeIn(timer);
+				setTimeout(function(){
+					if (highscore<level-1){
+						win.play();
+					}
+					$(".end_game").show();
+				}, 3000);
+			}
+		});
+		
+		$(".no_new_game").click(function(e){
+			click.play();
+			setTimeout(function(){
+				window.location.href="index.html";
+			}, 100);
+		});
+		$(".yes_new_game").click(function(e){
+			click.play();
+			setTimeout(function(){
+				window.location.reload();
+			}, 100);
+		});
+		
+		
+	});
+	</script>
+    </body>
+</html>
